@@ -1,0 +1,62 @@
+---
+title: "Task 1"
+author: "Dylan Glave"
+date: "1/20/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(patchwork)
+library(janitor)
+library(here)
+library(readxl)
+library(gghighlight)
+library(plotly)
+library(lubridate)
+library(ggridges)
+library(RColorBrewer)
+```
+
+
+## Reading in data for Sierra Nevada Amphibians
+
+```{r}
+sierra_raw <- read_excel("sierra_amphibians.xlsx") %>% 
+  clean_names() %>% 
+  mutate(across(where(is.character), tolower)) %>% 
+  mutate(survey_date = ymd(survey_date))
+  
+
+```
+
+I've now changed the dates to ymd dates, brought all observations to lower case, and cleaned_names (which didn't seem to do anything.)
+
+Now I'm going to explore visualizing this data. This will require grouping amphibians by year, and creating a df excluding "EggMass," from the life stages **Rana muscosa**
+
+```{r}
+ramu_by_year <- sierra_raw %>% 
+ mutate(year = year(survey_date)) %>% 
+  filter(amphibian_species == "ramu") %>% 
+  filter(amphibian_life_stage == c("adult", "subadult", "tadpole")) 
+##Quick summary df of ramu amphibians, grouped by year and life stage.
+ramu_summary <- ramu_by_year %>% 
+  group_by(year, amphibian_life_stage) %>% 
+  summarize(total = sum(amphibian_number))
+
+
+
+```
+
+Making a basic plot of ramu life stages across all sites, grouped by year
+
+```{r}
+ggplot(data = ramu_summary, aes(x = year, y = total, fill = amphibian_life_stage)) +
+ geom_col() +
+  theme_minimal() +
+  labs( x = "Year", y ="Total Organisms Found", title =  "Rana muscosa Observations", fill = "Life Stages")
+
+ 
+```
+
