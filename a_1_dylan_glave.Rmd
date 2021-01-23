@@ -18,6 +18,7 @@ library(plotly)
 library(lubridate)
 library(ggridges)
 library(RColorBrewer)
+library(wesanderson)
 ```
 
 
@@ -40,11 +41,11 @@ Now I'm going to explore visualizing this data. This will require grouping amphi
 ramu_by_year <- sierra_raw %>% 
  mutate(year = year(survey_date)) %>% 
   filter(amphibian_species == "ramu") %>% 
-  filter(amphibian_life_stage == c("adult", "subadult", "tadpole")) 
+  filter(amphibian_life_stage != "eggmass") 
 ##Quick summary df of ramu amphibians, grouped by year and life stage.
 ramu_summary <- ramu_by_year %>% 
   group_by(year, amphibian_life_stage) %>% 
-  summarize(total = sum(amphibian_number))
+  summarize(total = sum(amphibian_number, na.rm = TRUE))
 
 
 
@@ -56,9 +57,47 @@ Making a basic plot of ramu life stages across all sites, grouped by year
 ggplot(data = ramu_summary, aes(x = year, y = total, fill = amphibian_life_stage)) +
  geom_col() +
   theme_minimal() +
-  labs( x = "Year", y ="Total Organisms Found", title =  "Rana muscosa Observations", fill = "Life Stages")
+  labs( x = "Year", y ="Total Organisms Found", title =  "Rana muscosa Observations", fill = "Life Stages") 
 
  
+```
+
+## Task 1, Part 2: 
+
+We'll play around to get the 5 lakes with the highest counts of *Rana muscosa*
+
+```{r}
+ramu_by_lake <-  sierra_raw  %>% 
+  filter(amphibian_species == "ramu") %>% 
+  filter(amphibian_life_stage != "eggmass") %>% 
+  filter(amphibian_life_stage != "tadpole") %>% 
+  group_by(lake_id) %>% 
+  summarize(total = sum(amphibian_number)) %>% 
+  slice_max(total, n=5) %>% 
+  mutate(lake_id = as.factor(paste("Lake", lake_id))) %>% 
+mutate(lake_id = fct_reorder(lake_id, total))
+  
+  
+```
+
+Now I have a summary table, across all years, of Adult and Subadult Rana Muscosa. In the df, I've made lake_id a factor, added the word "Lake" before each ID number, and reordered the lakes. In their new order, the 5 lakes are listed from highest to lowest counts of *Rana muscosa*
+
+From here, we'll make a column graph of these 5 lakes. 
+
+```{r}
+rana_lake_graph <- ggplot(data = ramu_by_lake, aes(x = lake_id, y = total)) +
+  geom_col(aes(fill = lake_id, color = lake_id), 
+           alpha = 0.8,
+           show.legend = FALSE) +
+  scale_fill_manual(values=wes_palette(n=5, name="Royal2")) +
+  scale_color_manual(values=wes_palette(n=5, name="Royal2")) +
+  labs( x = "Lake Site (By ID #)", y = "Total Obvervations", title = "Top Five sites of Adult and Subadult \n Rana muscosa (Across all years)") +
+  theme_light()
+  
+  
+
+rana_lake_graph
+
 ```
 
 
@@ -92,7 +131,7 @@ three_food_pca$rotation
 ```{r}
 
 food_graphable <- select_foods %>% 
-  drop_na(energy_kcal, ends_with( "_g"))
+drop_na(energy_kcal, ends_with( "_g"))
   
 
 ### Then, we make an autoplot of the above PCA, to visualize how Fat and micro nutrients relate to one another. 
@@ -103,7 +142,7 @@ autoplot(three_food_pca,
          loadings = TRUE,
          loadings.label = TRUE) +
   theme_minimal() +
-  lab( color = "Food Groups") +
+  labs( color = "Food Groups") +
   theme_minimal()
 
 
