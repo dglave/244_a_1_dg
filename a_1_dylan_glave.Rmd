@@ -103,10 +103,9 @@ autoplot(three_food_pca,
          loadings = TRUE,
          loadings.label = TRUE) +
   theme_minimal() +
-  lab( color = "Food Groups",
-       ) +
-  scale_color_manual(values = c("blue","purple","orange")) +
-  scale_fill_manual(values = c("blue","purple","orange")) 
+  lab( color = "Food Groups") +
+  theme_minimal()
+
 
 ```
 
