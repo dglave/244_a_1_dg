@@ -13,6 +13,7 @@ library(janitor)
 library(here)
 library(readxl)
 library(gghighlight)
+library(ggfortify)
 library(plotly)
 library(lubridate)
 library(ggridges)
@@ -62,4 +63,48 @@ ggplot(data = ramu_summary, aes(x = year, y = total, fill = amphibian_life_stage
 
 
 
-## Task 2: More 
+## Task 2: Principal Component Analysis
+
+I decided to focus this PCA on vegetables. Below I read in the USDA nutrition data, and create a df "veggies_raw" of just Vegetables and Vegetable Products. From there I did some basic cleaning, to make the df coder friendly. 
+
+This Principal Component Analysis 
+
+```{r}
+usda_raw <- read.csv("usda_nutrients.csv")
+
+select_foods <- usda_raw %>% 
+  filter(FoodGroup == c("Vegetables and Vegetable Products", "Poultry Products", "Snacks")) %>% 
+    mutate(across(where(is.character), tolower)) %>% 
+  clean_names()
+
+three_food_pca <- select_foods %>% 
+  select(energy_kcal,
+         ends_with("_g")) %>% 
+  drop_na() %>% 
+   scale() %>% 
+  prcomp()
+
+three_food_pca$rotation
+
+```
+
+
+```{r}
+
+food_graphable <- select_foods %>% 
+  drop_na(energy_kcal, ends_with( "_g"))
+  
+
+### Then, we make an autoplot of the above PCA, to visualize how Fat and micro nutrients relate to one another. 
+
+autoplot(three_food_pca, 
+         data = food_graphable,
+         colour = "food_group",
+         loadings = TRUE,
+         loadings.label = TRUE) +
+  theme_minimal()
+
+```
+
+
+
