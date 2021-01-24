@@ -19,6 +19,7 @@ library(lubridate)
 library(ggridges)
 library(RColorBrewer)
 library(wesanderson)
+library(ggtext)
 ```
 
 
@@ -57,7 +58,7 @@ Making a basic plot of ramu life stages across all sites, grouped by year
 ggplot(data = ramu_summary, aes(x = year, y = total, fill = amphibian_life_stage)) +
  geom_col() +
   theme_minimal() +
-  labs( x = "Year", y ="Total Organisms Found", title =  "Rana muscosa Observations", fill = "Life Stages") 
+  labs( x = "Year", y ="Total Organisms Found", title =  "Rana muscosa Observations", fill = "Life Stages")
 
  
 ```
@@ -140,7 +141,8 @@ autoplot(three_food_pca,
          data = food_graphable,
          colour = "food_group",
          loadings = TRUE,
-         loadings.label = TRUE) +
+         loadings.label = TRUE,
+         size = 0.4) +
   theme_minimal() +
   labs( color = "Food Groups") +
   theme_minimal()
@@ -149,4 +151,7 @@ autoplot(three_food_pca,
 ```
 
 
-
+ - Principal components 1 and 2 cover 76.2% of all variance
+-  protein (in grams) is straight up, meaning that is positively correlates with PC2.
+ - None of the variables point to the right. This means that none of these variables are positively. 
+ - 
