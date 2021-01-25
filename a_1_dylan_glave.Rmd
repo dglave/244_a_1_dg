@@ -1,9 +1,10 @@
----
-title: "Task 1"
+--- 
+title: "Assignment 1, Task 1"
 author: "Dylan Glave"
 date: "1/20/2021"
 output: html_document
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -20,10 +21,15 @@ library(ggridges)
 library(RColorBrewer)
 library(wesanderson)
 library(ggtext)
+library(patchwork)
 ```
 
 
-## Reading in data for Sierra Nevada Amphibians
+# Sierra Nevada Amphibians
+
+## Wrangling
+
+Below I am reading in data for Sierra Nevada Amphibians to a raw dataframe, and making the observations a bit more coder-friendly with lower-case writing and dates in ymd format. 
 
 ```{r}
 sierra_raw <- read_excel("sierra_amphibians.xlsx") %>% 
@@ -34,9 +40,12 @@ sierra_raw <- read_excel("sierra_amphibians.xlsx") %>%
 
 ```
 
-I've now changed the dates to ymd dates, brought all observations to lower case, and cleaned_names (which didn't seem to do anything.)
+I've now changed the dates to ymd dates, brought all observations to lower case, and cleaned_names (which didn't seem to do much after the other fucntions.)
 
-Now I'm going to explore visualizing this data. This will require grouping amphibians by year, and creating a df excluding "EggMass," from the life stages **Rana muscosa**
+To visualize this data, I'll make a more focused df. 
+This will require grouping amphibians by year, and creating a df excluding "EggMass," from the life stages **Rana muscosa**
+
+From there I make a summary df of **Rana muscosa**, grouped by year, life stage, and total observations. 
 
 ```{r}
 ramu_by_year <- sierra_raw %>% 
@@ -52,23 +61,32 @@ ramu_summary <- ramu_by_year %>%
 
 ```
 
-Making a basic plot of ramu life stages across all sites, grouped by year
+Making a basic plot of ramu life stages across all sites, grouped by year. This plot contains 3 facets of **Rana muscosa**, one for each life stage. With that, we can see the relative abundance of adults and subadults, while the tadpole numbers dwarf these subsets. 
 
 ```{r}
-ggplot(data = ramu_summary, aes(x = year, y = total, fill = amphibian_life_stage)) +
- geom_col() +
+rana_year_graph <- ggplot(data = ramu_summary, aes(x = year, y = total, fill = amphibian_life_stage, color = amphibian_life_stage)) +
+ geom_col(show.legend = FALSE) +
   theme_minimal() +
-  labs( x = "Year", y ="Total Organisms Found", title =  "Rana muscosa Observations", fill = "Life Stages")
+  theme(axis.text.x = element_text(angle=45)) +
+  labs( x = "Year",
+        y ="Total Organisms Found", 
+        title =  "Rana muscosa Observations \n (Across all sites") +
+  facet_wrap("amphibian_life_stage") +
+  scale_fill_manual(values=wes_palette(n=3, name="Royal2")) +
+  scale_color_manual(values=wes_palette(n=3, name="Royal2")) 
 
+  
  
 ```
 
 ## Task 1, Part 2: 
 
-We'll play around to get the 5 lakes with the highest counts of *Rana muscosa*
+We'll play around to get the 5 lakes with the highest counts of *Rana muscosa*, and put them into a bar graph at the end. 
+
+To start, I'll only count adult and subadult observations, summarize them by lake ID, and list the top 5 in a summar df. 
 
 ```{r}
-ramu_by_lake <-  sierra_raw  %>% 
+ramu_by_lake <-  sierra_raw %>% 
   filter(amphibian_species == "ramu") %>% 
   filter(amphibian_life_stage != "eggmass") %>% 
   filter(amphibian_life_stage != "tadpole") %>% 
@@ -81,7 +99,7 @@ mutate(lake_id = fct_reorder(lake_id, total))
   
 ```
 
-Now I have a summary table, across all years, of Adult and Subadult Rana Muscosa. In the df, I've made lake_id a factor, added the word "Lake" before each ID number, and reordered the lakes. In their new order, the 5 lakes are listed from highest to lowest counts of *Rana muscosa*
+Now I have a summary table, across all years, of Adult and Subadult **Rana muscosa**. In the df, I've made lake_id a factor, added the word "Lake" before each ID number, and reordered the lakes. In their new order, the 5 lakes are listed from highest to lowest counts of 8*Rana muscosa*8
 
 From here, we'll make a column graph of these 5 lakes. 
 
@@ -102,56 +120,13 @@ rana_lake_graph
 ```
 
 
-
-## Task 2: Principal Component Analysis
-
-I decided to focus this PCA on vegetables. Below I read in the USDA nutrition data, and create a df "veggies_raw" of just Vegetables and Vegetable Products. From there I did some basic cleaning, to make the df coder friendly. 
-
-This Principal Component Analysis 
+Now that have these two graphs of *Rana muscosa*, I am plotting them together, using the patchwork package. 
 
 ```{r}
-usda_raw <- read.csv("usda_nutrients.csv")
-
-select_foods <- usda_raw %>% 
-  filter(FoodGroup == c("Vegetables and Vegetable Products", "Poultry Products", "Snacks")) %>% 
-    mutate(across(where(is.character), tolower)) %>% 
-  clean_names()
-
-three_food_pca <- select_foods %>% 
-  select(energy_kcal,
-         ends_with("_g")) %>% 
-  drop_na() %>% 
-   scale() %>% 
-  prcomp()
-
-three_food_pca$rotation
-
+rana_lake_graph / rana_year_graph
 ```
 
 
-```{r}
 
-food_graphable <- select_foods %>% 
-drop_na(energy_kcal, ends_with( "_g"))
-  
+### End of Document
 
-### Then, we make an autoplot of the above PCA, to visualize how Fat and micro nutrients relate to one another. 
-
-autoplot(three_food_pca, 
-         data = food_graphable,
-         colour = "food_group",
-         loadings = TRUE,
-         loadings.label = TRUE,
-         size = 0.4) +
-  theme_minimal() +
-  labs( color = "Food Groups") +
-  theme_minimal()
-
-
-```
-
-
- - Principal components 1 and 2 cover 76.2% of all variance
--  protein (in grams) is straight up, meaning that is positively correlates with PC2.
- - None of the variables point to the right. This means that none of these variables are positively. 
- - 
