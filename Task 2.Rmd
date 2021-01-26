@@ -26,9 +26,24 @@ library(ggtext)
 
 ## Task 2: Principal Component Analysis
 
+
+### Description
+
+The USDA gathers nutrient information for thousands of food types, from restaurant foods like steak dinners, to raw vegetables. The amounts of macronurtients may be correlated with one another (like protein, fats, carbohydrates and calories.) This multitude of variables makes visualization on standard Cartesian coordinates (X an Y plot,) a bit difficult, so I am going to explore them in multivariate space, using Principal Component Analysis. 
+
+--- 
+
+
 I decided to focus this PCA on vegetables. Below I read in the USDA nutrition data, and create a df "veggies_raw" of just Vegetables and Vegetable Products. From there I did some basic cleaning, to make the df coder friendly. 
 
-This Principal Component Analysis 
+### This Principal Component Analysis 
+
+To run the PCA, I take the USDA data, and select three food groups to visually explore together: 
+- Vegetables and Vegatable Products
+- Snacks
+- Poultry Products
+
+From there, I put them all into a dataframe that includes their macronutrient and caloric amounts, to compare. I scale this data so no one variable carries too much weight.  I then run the PCA using prcomp(), and view their rotated values using $rotation. 
 
 ```{r}
 usda_raw <- read.csv("usda_nutrients.csv")
@@ -50,6 +65,8 @@ three_food_pca$rotation
 ```
 
 
+To visualize the PCA, I am creating a biplot. A biplot takes two Principal components (newly made axes) to account for as much variance as possible within the data. Each variable has a vector (a red arrow) that shows two things: how closely that variable correlated with other variables/vectors, and how powerfully it related to Principal Components 1 and 2.    
+
 ```{r}
 
 food_graphable <- select_foods %>% 
@@ -65,7 +82,7 @@ autoplot(three_food_pca,
          loadings.label = TRUE,
          size = 0.4) +
   theme_minimal() +
-  labs( color = "Food Groups") +
+  labs( color = "Food Groups", title = "Comparing Relative Nutrient amound in 3 Food Groups") +
   theme_minimal()
 
 
@@ -78,3 +95,5 @@ autoplot(three_food_pca,
  - Variables, shown in red lines, that are close in angle, are very correlated.
  - The same goes for points! Points that appear in clusters are closely related across the first principal components. In this plot, the *Poultry* and *Vegetables* food groups form clusters, while very few of the *Snack* points cluster together.
  
+
+### End of Document

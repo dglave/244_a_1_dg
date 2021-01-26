@@ -17,7 +17,6 @@ library(gghighlight)
 library(ggfortify)
 library(plotly)
 library(lubridate)
-library(ggridges)
 library(RColorBrewer)
 library(wesanderson)
 library(ggtext)
@@ -99,7 +98,7 @@ mutate(lake_id = fct_reorder(lake_id, total))
   
 ```
 
-Now I have a summary table, across all years, of Adult and Subadult **Rana muscosa**. In the df, I've made lake_id a factor, added the word "Lake" before each ID number, and reordered the lakes. In their new order, the 5 lakes are listed from highest to lowest counts of 8*Rana muscosa*8
+Now I have a summary table, across all years, of Adult and Subadult **Rana muscosa**. In the df, I've made lake_id a factor, added the word "Lake" before each ID number, and reordered the lakes. In their new order, the 5 lakes are listed from highest to lowest counts of **Rana muscosa**
 
 From here, we'll make a column graph of these 5 lakes. 
 
@@ -114,7 +113,6 @@ rana_lake_graph <- ggplot(data = ramu_by_lake, aes(x = lake_id, y = total)) +
   theme_light()
   
   
-
 rana_lake_graph
 
 ```
